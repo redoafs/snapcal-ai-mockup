@@ -40,6 +40,23 @@ npm run start -- -H 127.0.0.1 -p 3000
 
 Panduan lengkap: lihat `CARA_PAKAI_APLIKASI.md`.
 
+## Versi Pro & pembayaran (Lynk.id)
+
+Paket Pro dijual lewat **Lynk.id**. Layar **Pilih paket** menampilkan tiga paket
+Pro (Bulanan/Tahunan/Lifetime) dengan tombol checkout ke Lynk.id.
+
+Atur tautannya lewat environment variable (lihat `.env.example`):
+
+```
+NEXT_PUBLIC_LYNK_URL=https://lynk.id/<username>
+NEXT_PUBLIC_LYNK_PRO_MONTHLY=...
+NEXT_PUBLIC_LYNK_PRO_YEARLY=...
+NEXT_PUBLIC_LYNK_PRO_LIFETIME=...
+```
+
+Paket & harga didefinisikan di `lib/db.ts` (`PLAN_TIERS`) dan disinkronkan
+otomatis ke basis data. Panduan lengkap: `docs/PANDUAN_VERSI_PRO_LYNKID.md`.
+
 ## Struktur proyek
 
 ```

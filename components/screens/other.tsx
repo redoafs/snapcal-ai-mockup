@@ -280,78 +280,116 @@ export function ReportScreen() {
   );
 }
 
+/** Format ringkas harga Rupiah untuk jendela ponsel (mis. 49000 -> Rp49rb). */
+function rupiahShort(n: number) {
+  if (n >= 1_000_000) return 'Rp' + (n / 1_000_000).toFixed(1).replace('.', ',') + 'jt';
+  if (n >= 1000) return 'Rp' + Math.round(n / 1000) + 'rb';
+  return 'Rp' + n;
+}
+
 export function SubscribeScreen({ plans }: { plans: any[] }) {
   return (
     <div className="flex h-full flex-col">
       <StatusBar />
       <ScreenHead
         title="Pilih paket"
-        sub="Mulai gratis, naikkan bila diperlukan."
+        sub="Mulai gratis, naikkan ke Pro bila diperlukan."
+        right={<Chip tone="brand">Lynk.id</Chip>}
       />
       <ScreenBody className="pb-4">
-        {plans.map((p) => (
-          <div
-            key={p.code}
-            className={`card relative ${
-              p.is_featured ? 'border-2 border-brand-500 bg-brand-50/40' : ''
-            }`}
-          >
-            {p.is_featured ? (
-              <span className="absolute -top-2 right-4 rounded-full bg-brand-600 px-2.5 py-0.5 text-[0.6rem] font-semibold text-white">
-                paling umum
-              </span>
-            ) : null}
-            <div className="flex items-start justify-between">
-              <div>
-                <div className="text-[1rem] font-semibold text-ink-950">{p.name}</div>
-                <div className="mt-0.5 text-[0.7rem] text-ink-500">{p.tagline}</div>
-              </div>
-              <div className="text-right">
-                <div className="tabular text-[1.1rem] font-semibold text-ink-950">
-                  {p.price_idr === 0 ? (
-                    'Gratis'
-                  ) : (
-                    <>
-                      {Math.round(p.price_idr / 1000)}
-                      <span className="text-[0.7rem] font-medium text-ink-500">rb/bln</span>
-                    </>
-                  )}
-                </div>
-                {p.price_idr > 0 ? (
-                  <div className="text-[0.6rem] text-ink-400">bisa bulanan</div>
-                ) : null}
-              </div>
-            </div>
-            <ul className="mt-3 space-y-1.5 border-t border-ink-100 pt-3">
-              {p.featureList.map((f: string) => (
-                <li key={f} className="flex gap-2">
-                  <span
-                    className={`mt-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full text-[0.55rem] font-bold text-white ${
-                      p.is_featured ? 'bg-brand-600' : 'bg-ink-400'
-                    }`}
-                  >
-                    ✓
-                  </span>
-                  <span className="text-[0.73rem] leading-snug text-ink-700">{f}</span>
-                </li>
-              ))}
-            </ul>
-            <button
-              className={`${p.is_featured ? 'btn-primary' : 'btn-secondary'} mt-3 w-full`}
+        {plans.map((p) => {
+          const paid = p.price_idr > 0;
+          return (
+            <div
+              key={p.code}
+              className={`card relative ${
+                p.is_featured ? 'border-2 border-brand-500 bg-brand-50/40' : ''
+              }`}
             >
-              {p.is_featured ? 'Coba gratis 14 hari' : 'Tetap di gratis'}
-            </button>
-          </div>
-        ))}
+              {p.is_featured ? (
+                <span className="absolute -top-2 right-4 rounded-full bg-brand-600 px-2.5 py-0.5 text-[0.6rem] font-semibold text-white">
+                  paling hemat
+                </span>
+              ) : null}
+              <div className="flex items-start justify-between">
+                <div className="min-w-0 pr-2">
+                  <div className="text-[1rem] font-semibold text-ink-950">{p.name}</div>
+                  <div className="mt-0.5 text-[0.7rem] text-ink-500">{p.tagline}</div>
+                </div>
+                <div className="shrink-0 text-right">
+                  <div className="tabular text-[1.1rem] font-semibold text-ink-950">
+                    {p.price_idr === 0 ? (
+                      'Gratis'
+                    ) : (
+                      <>
+                        {rupiahShort(p.price_idr)}
+                        <span className="text-[0.6rem] font-medium text-ink-500">
+                          {' '}
+                          {p.periodLabel}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                  {p.savingsPct ? (
+                    <div className="text-[0.6rem] font-semibold text-emerald-600">
+                      hemat {p.savingsPct}%
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+              <ul className="mt-3 space-y-1.5 border-t border-ink-100 pt-3">
+                {p.featureList.map((f: string) => (
+                  <li key={f} className="flex gap-2">
+                    <span
+                      className={`mt-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full text-[0.55rem] font-bold text-white ${
+                        p.is_featured ? 'bg-brand-600' : 'bg-ink-400'
+                      }`}
+                    >
+                      ✓
+                    </span>
+                    <span className="text-[0.73rem] leading-snug text-ink-700">{f}</span>
+                  </li>
+                ))}
+              </ul>
 
-        <Note tone="info" title="Batal kapan saja">
+              {paid ? (
+                p.checkout_url ? (
+                  <a
+                    href={p.checkout_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`${p.is_featured ? 'btn-primary' : 'btn-secondary'} mt-3 w-full`}
+                  >
+                    Langganan via Lynk.id
+                  </a>
+                ) : (
+                  <button className="btn-secondary mt-3 w-full" disabled>
+                    Tautan pembayaran belum diatur
+                  </button>
+                )
+              ) : (
+                <button className="btn-ghost mt-3 w-full" disabled>
+                  Paket saat ini
+                </button>
+              )}
+            </div>
+          );
+        })}
+
+        <Note tone="info" title="Pembayaran aman lewat Lynk.id">
+          Bayar dengan QRIS, transfer bank (virtual account), atau e-wallet.
+          Akses Pro diaktifkan maksimal 1x24 jam setelah pembayaran
+          terverifikasi.
+        </Note>
+
+        <Note tone="brand" title="Batal kapan saja">
           Tidak ada kontrak jangka panjang. Pembatalan berlaku di akhir
           periode berjalan.
         </Note>
 
         <p className="text-center text-[0.65rem] leading-snug text-ink-400">
-          Harga final dan ketersediaan metode pembayaran per wilayah
-          masih dalam tahap validasi.
+          Harga dalam Rupiah. Harga final dan ketersediaan metode pembayaran
+          per wilayah masih dalam tahap validasi.
         </p>
       </ScreenBody>
       <BottomNav active="more" />

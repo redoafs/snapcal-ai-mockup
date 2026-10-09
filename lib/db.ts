@@ -257,40 +257,6 @@ function seed(db) {
        VALUES (?,?,?,?,?)`
     ).run(userId, 'free', 'active', 0, null);
 
-    db.prepare(
-      `INSERT INTO plan_tiers (code,name,price_idr,tagline,features,is_featured)
-       VALUES (?,?,?,?,?,?)`
-    ).run(
-      'free',
-      'Free',
-      0,
-      'Cukup untuk mencoba alur harian',
-      [
-        'Scan 5 foto per hari',
-        'Rekomendasi porsi harian',
-        'Logging makanan dan berat',
-        'Database nutrisi offline dasar',
-      ].join('|'),
-      0
-    );
-    db.prepare(
-      `INSERT INTO plan_tiers (code,name,price_idr,tagline,features,is_featured)
-       VALUES (?,?,?,?,?,?)`
-    ).run(
-      'premium',
-      'Premium',
-      149000,
-      'Untuk komitmen jangka panjang dan pengguna profesional',
-      [
-        'Scan tanpa batas',
-        'Estimasi glycemic response',
-        'Coaching dan insight mingguan',
-        'Ekspor laporan untuk profesional',
-        'Program terstruktur dan badge',
-      ].join('|'),
-      1
-    );
-
     const screens = [
       ['welcome', 'UF-01', 'Registrasi dan onboarding', 'Selamat datang', 'Titik masuk pengguna, posisi produk dan janji nilai utama.', 'FR-001, FR-004'],
       ['signup', 'UF-01', 'Registrasi dan onboarding', 'Buat akun', 'Formulir email dan kata sandi dengan validasi langsung.', 'FR-001'],
@@ -322,6 +288,94 @@ function seed(db) {
   tx();
 }
 
+/**
+ * Paket langganan kanonik. Disinkronkan (upsert) setiap kali basis data dibuka
+ * agar perubahan paket/harga langsung berlaku tanpa perlu seed ulang.
+ */
+const PLAN_TIERS = [
+  {
+    code: 'free',
+    name: 'Free',
+    price_idr: 0,
+    tagline: 'Cukup untuk mencoba alur harian',
+    features: [
+      'Scan 5 foto per hari',
+      'Rekomendasi porsi harian',
+      'Logging makanan dan berat',
+      'Database nutrisi offline dasar',
+    ],
+    is_featured: 0,
+  },
+  {
+    code: 'pro_monthly',
+    name: 'Pro Bulanan',
+    price_idr: 49000,
+    tagline: 'Scan tanpa batas, ditagih tiap bulan',
+    features: [
+      'Scan tanpa batas',
+      'Estimasi glycemic response',
+      'Coaching dan insight mingguan',
+      'Ekspor laporan untuk profesional',
+      'Program terstruktur dan badge',
+    ],
+    is_featured: 0,
+  },
+  {
+    code: 'pro_yearly',
+    name: 'Pro Tahunan',
+    price_idr: 399000,
+    tagline: 'Bayar sekali setahun, lebih hemat',
+    features: [
+      'Semua fitur Pro Bulanan',
+      'Hemat 32% (setara Rp33.250/bulan)',
+      'Prioritas dukungan pelanggan',
+      'Badge pendukung awal',
+    ],
+    is_featured: 1,
+  },
+  {
+    code: 'pro_lifetime',
+    name: 'Pro Lifetime',
+    price_idr: 899000,
+    tagline: 'Bayar sekali, akses selamanya (kuota terbatas)',
+    features: [
+      'Semua fitur Pro',
+      'Akses selamanya tanpa perpanjangan',
+      'Kuota terbatas 100 pengguna pertama',
+    ],
+    is_featured: 0,
+  },
+];
+
+function syncPlanTiers(db) {
+  const upsert = db.prepare(
+    `INSERT INTO plan_tiers (code,name,price_idr,tagline,features,is_featured)
+     VALUES (@code,@name,@price_idr,@tagline,@features,@is_featured)
+     ON CONFLICT(code) DO UPDATE SET
+       name=excluded.name,
+       price_idr=excluded.price_idr,
+       tagline=excluded.tagline,
+       features=excluded.features,
+       is_featured=excluded.is_featured`
+  );
+  const tx = db.transaction(() => {
+    for (const t of PLAN_TIERS) {
+      upsert.run({
+        code: t.code,
+        name: t.name,
+        price_idr: t.price_idr,
+        tagline: t.tagline,
+        features: t.features.join('|'),
+        is_featured: t.is_featured,
+      });
+    }
+    db.prepare(
+      "DELETE FROM plan_tiers WHERE code NOT IN ('free','pro_monthly','pro_yearly','pro_lifetime')"
+    ).run();
+  });
+  tx();
+}
+
 export function getDb() {
   if (instance) return instance;
   if (!fs.existsSync(DB_DIR)) fs.mkdirSync(DB_DIR, { recursive: true });
@@ -330,6 +384,7 @@ export function getDb() {
   db.pragma('foreign_keys = ON');
   db.exec(SCHEMA);
   seed(db);
+  syncPlanTiers(db);
   instance = db;
   return db;
 }
@@ -403,10 +458,30 @@ export function getBodyMetrics() {
 }
 
 export function getPlans() {
+  const fallback = process.env.NEXT_PUBLIC_LYNK_URL || '';
+  const checkout: Record<string, string> = {
+    free: '',
+    pro_monthly: process.env.NEXT_PUBLIC_LYNK_PRO_MONTHLY || fallback,
+    pro_yearly: process.env.NEXT_PUBLIC_LYNK_PRO_YEARLY || fallback,
+    pro_lifetime: process.env.NEXT_PUBLIC_LYNK_PRO_LIFETIME || fallback,
+  };
+  const period: Record<string, string> = {
+    free: '',
+    pro_monthly: '/bulan',
+    pro_yearly: '/tahun',
+    pro_lifetime: 'sekali bayar',
+  };
+  const savings: Record<string, number> = { pro_yearly: 32 };
   return getDb()
     .prepare('SELECT * FROM plan_tiers ORDER BY price_idr')
     .all()
-    .map((p) => ({ ...p, featureList: p.features.split('|') }));
+    .map((p) => ({
+      ...p,
+      featureList: p.features.split('|'),
+      checkout_url: checkout[p.code] || '',
+      periodLabel: period[p.code] || '',
+      savingsPct: savings[p.code] || 0,
+    }));
 }
 
 export function getScreens() {
