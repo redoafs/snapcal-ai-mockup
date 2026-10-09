@@ -8,7 +8,8 @@
   command = "npm run build"
 
 [build.environment]
-  NODE_VERSION = "20"
+  # supabase-js sudah membutuhkan Node 22+ (Node 20 memunculkan deprecation warning).
+  NODE_VERSION = "22"
 
 # ===== Environment variables WAJIB (isi di Netlify sebelum deploy) =====
 # Nilai NEXT_PUBLIC_* dikunci saat BUILD, jadi isi dulu:

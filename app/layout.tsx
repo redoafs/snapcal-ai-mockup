@@ -1,6 +1,11 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
+// Aplikasi memakai sesi Supabase (cookie) di hampir semua halaman, jadi
+// render dinamis per-request. Tanpa ini, `next build` mencoba meng-prerender
+// /login & /register dan gagal saat env Supabase tidak ada pada saat build.
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'SnapCal AI - UI/UX Mockup',
   description:
