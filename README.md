@@ -149,6 +149,24 @@ Setiap pembayaran yang tercatat memberi **50 token scan** ke email pembeli
 dijelaskan di `docs/PANDUAN_TOKEN_LYNKID.md` (termasuk Apps Script
 `integrations/lynk-webhook.gs`).
 
+## Deploy ke Netlify (bisa dibuka dari jaringan mana pun)
+
+Agar aplikasi bisa dibuka dari HP/laptop/PC pada jaringan mana saja tanpa
+laptop menyala, deploy ke **Netlify Free**:
+
+1. Repo sudah berisi `netlify.toml` (Node 20, runtime Next.js otomatis).
+2. Di **app.netlify.com → Add new site → Import from GitHub** pilih
+   `snapcal-ai-mockup`.
+3. Isi environment variables sebelum deploy:
+   `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
+   `NEXT_PUBLIC_LYNK_URL` (nilainya dari `.env.local`).
+4. Di **Supabase → Authentication → URL Configuration**: set Site URL ke
+   `https://<nama-situs>.netlify.app` dan Redirect URLs ke
+   `https://<nama-situs>.netlify.app/**` (agar verifikasi email balik ke
+   domain Netlify).
+
+Panduan lengkap: `docs/PANDUAN_DEPLOY_NETLIFY.md`.
+
 ## Struktur proyek
 
 ```
