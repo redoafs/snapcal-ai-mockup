@@ -1,57 +1,25 @@
 /**
  * Lapisan data SnapCal AI (mockup) — Supabase.
  *
- * Menggantikan SQLite lokal. Aplikasi masuk sebagai "akun demo" memakai kunci
- * publishable/anon, sehingga Row Level Security (RLS) tetap aktif dan data yang
- * dibaca hanya milik pengguna demo tersebut.
+ * Aplikasi memakai Supabase Auth sungguhan (sesi berbasis cookie lewat
+ * @supabase/ssr). Row Level Security (RLS) memastikan tiap pengguna hanya
+ * membaca datanya sendiri, sehingga akun demo tidak lagi dipakai untuk
+ * membaca data.
  *
  * Env yang dipakai:
- *   SUPABASE_URL              (atau NEXT_PUBLIC_SUPABASE_URL)
- *   SUPABASE_ANON_KEY         (atau NEXT_PUBLIC_SUPABASE_ANON_KEY)
- *   SUPABASE_DEMO_EMAIL       (default: redo@snapcal.ai)
- *   SUPABASE_DEMO_PASSWORD    (default: snapcal-demo-2026)
+ *   NEXT_PUBLIC_SUPABASE_URL
+ *   NEXT_PUBLIC_SUPABASE_ANON_KEY
  */
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from './database.types';
-
-const SUPABASE_URL =
-  process.env.SUPABASE_URL ||
-  process.env.NEXT_PUBLIC_SUPABASE_URL ||
-  '';
-
-const SUPABASE_ANON_KEY =
-  process.env.SUPABASE_ANON_KEY ||
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-  '';
-
-const DEMO_EMAIL = process.env.SUPABASE_DEMO_EMAIL || 'redo@snapcal.ai';
-const DEMO_PASSWORD = process.env.SUPABASE_DEMO_PASSWORD || 'snapcal-demo-2026';
+import { createClient as createServerSupabase } from '@/lib/supabase/server';
 
 /** Jumlah token yang diberikan otomatis setiap pembayaran Pro. */
 export const TOKENS_PER_PURCHASE = 50;
 
-/**
- * Membuat klien Supabase dan masuk sebagai akun demo. Dibuat baru tiap request
- * (mockup tanpa sesi pengguna sungguhan) agar tidak berbagi state.
- */
+/** Klien Supabase yang membaca sesi pengguna yang sedang masuk. */
 export async function getClient(): Promise<SupabaseClient<Database>> {
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    throw new Error(
-      'Supabase belum dikonfigurasi. Isi SUPABASE_URL dan SUPABASE_ANON_KEY.'
-    );
-  }
-  const db = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-  const { error } = await db.auth.signInWithPassword({
-    email: DEMO_EMAIL,
-    password: DEMO_PASSWORD,
-  });
-  if (error) {
-    throw new Error('Login Supabase (akun demo) gagal: ' + error.message);
-  }
-  return db;
+  return createServerSupabase();
 }
 
 function unwrap<T>(res: { data: T; error: { message: string } | null }, label: string): T {
@@ -92,9 +60,16 @@ export type AppData = Awaited<ReturnType<typeof loadData>>;
 export async function loadData() {
   const db = await getClient();
 
+  const {
+    data: { user: authUser },
+  } = await db.auth.getUser();
+  if (!authUser) {
+    throw new Error('Belum masuk. Silakan login terlebih dahulu.');
+  }
+
   const [profileRes, screensRes, plansRes, consentRes, subRes, mealsRes, recsRes, actsRes, metricsRes, ledgerRes] =
     await Promise.all([
-      db.from('user_profiles').select('*').limit(1).maybeSingle(),
+      db.from('user_profiles').select('*').eq('user_id', authUser.id).maybeSingle(),
       db.from('app_screens').select('*').order('screen_order'),
       db.from('plan_tiers').select('*').order('price_idr'),
       db.from('consents').select('*').order('granted_at', { ascending: false }).limit(1).maybeSingle(),

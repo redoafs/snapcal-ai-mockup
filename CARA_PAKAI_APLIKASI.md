@@ -16,6 +16,18 @@ Yang terjadi saat dibuka:
 2. Jendela aplikasi terbuka (ukuran ponsel, tanpa address bar).
 3. Menutup jendela **tidak** mematikan server.
 
+## Masuk ke aplikasi
+
+Saat pertama dibuka, aplikasi menampilkan halaman **Masuk** (`/login`).
+Gunakan akun demo:
+
+- Email: `redo@snapcal.ai`
+- Kata sandi: `snapcal-demo-2026`
+
+Tombol **Gunakan akun demo** mengisi kolom secara otomatis. Untuk mencoba
+pendaftaran, buka tautan **Daftar** (`/register`); akun baru otomatis mendapat
+data contoh. Tombol **Keluar** ada di kanan atas halaman utama.
+
 ## Menghentikan server
 
 - **Start Menu → Hentikan SnapCal AI**, atau

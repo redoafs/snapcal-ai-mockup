@@ -222,6 +222,21 @@ export default async function Home() {
               ))}
             </dl>
           </div>
+
+          <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-white/15 pt-4 text-[0.8rem] text-white/80">
+            <span>
+              Masuk sebagai{' '}
+              <strong className="font-semibold text-white">{user?.email}</strong>
+            </span>
+            <form action="/auth/signout" method="post">
+              <button
+                className="rounded-lg border border-white/30 px-3 py-1 font-semibold text-white transition hover:bg-white/10"
+                type="submit"
+              >
+                Keluar
+              </button>
+            </form>
+          </div>
         </div>
       </header>
 

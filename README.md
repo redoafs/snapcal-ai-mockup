@@ -13,8 +13,9 @@ menampilkan alur inti produk sesuai PRD SnapCal AI.
 - **Next.js 15** (App Router) + **React 19**
 - **TypeScript**
 - **Tailwind CSS 3**
-- **Supabase (Postgres)** — sumber data aplikasi, diakses dengan
-  `@supabase/supabase-js` (kunci publishable/anon, RLS aktif)
+- **Supabase (Postgres)** — sumber data + **autentikasi** aplikasi, diakses
+  dengan `@supabase/supabase-js` dan `@supabase/ssr` (kunci publishable/anon,
+  RLS aktif, sesi berbasis cookie)
 - Launcher Windows (VBS/PowerShell) untuk menjalankan sebagai aplikasi jendela
 
 ## Menjalankan
@@ -34,11 +35,16 @@ npm run db:check     # uji login akun demo + hitung baris tiap tabel
 npm run dev          # mode pengembangan -> http://localhost:3000
 ```
 
+Akun demo di atas adalah **pengguna Supabase Auth asli** — pakai untuk masuk di
+halaman `/login`. Untuk mencoba halaman `/register`, buat akun baru (data contoh
+otomatis dibuatkan, lihat bagian Autentikasi).
+
 Versi produksi:
 
 ```bash
 npm run build
 npm run start -- -H 127.0.0.1 -p 3000
+npm run auth:test    # uji alur login/keluar end-to-end (butuh server jalan)
 ```
 
 ### Menjalankan sebagai aplikasi (Windows)
@@ -49,6 +55,32 @@ npm run start -- -H 127.0.0.1 -p 3000
 - `scripts/buat-shortcut.ps1` — membuat shortcut Desktop dan Start Menu.
 
 Panduan lengkap: lihat `CARA_PAKAI_APLIKASI.md`.
+
+## Autentikasi (login, daftar, keluar)
+
+Aplikasi memakai **Supabase Auth** sungguhan dengan sesi berbasis cookie
+(`@supabase/ssr`). Halaman utama `/` hanya bisa dibuka setelah masuk.
+
+| Rute | Fungsi |
+| --- | --- |
+| `/login` | masuk dengan email + kata sandi (ada tombol "Gunakan akun demo") |
+| `/register` | buat akun baru (nama, email, kata sandi) |
+| `/auth/signout` | keluar (POST dari tombol **Keluar** di header) |
+| `/auth/confirm` | menerima tautan verifikasi email |
+
+- **Proteksi rute**: `middleware.ts` mengalihkan pengunjung yang belum masuk ke
+  `/login`, dan mengalihkan pengguna yang sudah masuk menjauh dari
+  `/login` & `/register`.
+- **Isolasi data**: RLS Supabase memakai `auth.uid()`, jadi tiap pengguna hanya
+  membaca datanya sendiri.
+- **Provisioning otomatis**: saat mendaftar, trigger `handle_new_user`
+  menjalankan `public.provision_starter_data()` sehingga akun baru langsung
+  punya profil, langganan **gratis**, consent, rekomendasi porsi, metrik,
+  aktivitas, satu hari log makanan, dan **5 token** bonus selamat datang.
+- **Konfirmasi email**: bila opsi "Confirm email" aktif di Supabase, pendaftar
+  harus membuka tautan verifikasi sebelum bisa masuk. Untuk mempermudah uji
+  coba, opsi ini bisa dimatikan di
+  *Supabase Dashboard → Authentication → Sign In / Providers → Email*.
 
 ## Basis data (Supabase)
 
@@ -61,8 +93,9 @@ Seluruh data mockup berada di **Supabase** dan dikelola lewat migrasi di
 | `user_profiles`, `consents`, `meals`, `meal_items`, `portion_recommendations`, `body_metrics`, `activities`, `subscriptions` | data pengguna |
 | `purchases`, `token_ledger` (+ view `token_balances`) | pembelian & token scan |
 
-Aplikasi masuk sebagai **akun demo** (`redo@snapcal.ai`) memakai kunci
-publishable/anon, sehingga RLS tetap menjaga isolasi data per pengguna.
+Aplikasi memakai kunci publishable/anon dan **Supabase Auth** (sesi berbasis
+cookie), sehingga RLS tetap menjaga isolasi data per pengguna. Akun baru
+disiapkan otomatis oleh migrasi `20261009000400_provision_new_users.sql`.
 
 ## Versi Pro, token, dan pembayaran (Lynk.id)
 
@@ -87,13 +120,16 @@ dijelaskan di `docs/PANDUAN_TOKEN_LYNKID.md` (termasuk Apps Script
 ## Struktur proyek
 
 ```
-app/                 # Halaman utama (App Router) + gaya global
+app/                 # Halaman utama, /login, /register, rute auth
 components/          # Komponen UI dan layar mockup per alur
   screens/           # onboarding, scan, dashboard, other
-lib/db.ts            # Klien Supabase + pengambilan data aplikasi
+lib/db.ts            # Pengambilan data aplikasi (sesi pengguna)
+lib/supabase/        # Klien Supabase server & browser (@supabase/ssr)
 lib/database.types.ts# Tipe hasil generate dari skema Supabase
-supabase/migrations/ # Skema + seed data (katalog & akun demo)
+middleware.ts        # Penyegar sesi + proteksi rute
+supabase/migrations/ # Skema, seed data, dan provisioning akun baru
 scripts/check-supabase.mjs # Uji koneksi/login Supabase
+scripts/check-auth.mjs     # Uji alur login/keluar (Playwright)
 scripts/capture.mjs  # Tangkapan layar otomatis (Playwright)
 scripts/*.ps1        # Launcher aplikasi Windows
 integrations/        # Apps Script webhook Lynk.id

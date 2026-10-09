@@ -14,6 +14,7 @@ data ini lewat `@supabase/supabase-js` (tidak ada lagi basis data SQLite lokal).
 | `migrations/20261009000100_harden_trigger_functions.sql` | perbaikan keamanan fungsi trigger |
 | `migrations/20261009000200_add_tokens_and_purchases.sql` | `purchases`, `token_ledger`, view `token_balances`, trigger token |
 | `migrations/20261009000300_seed_demo_data.sql` | akun demo + seed data (katalog & pengguna contoh) |
+| `migrations/20261009000400_provision_new_users.sql` | fungsi `provision_starter_data` + trigger pendaftaran (data awal akun baru) |
 
 Sudah diterapkan ke proyek.
 
@@ -41,7 +42,8 @@ atau MCP Supabase (`apply_migration`) dengan isi berkas migrasi.
 - `meal_items` mewarisi kepemilikan dari `meals` (policy via subquery).
 - Katalog diberi `select` saja; penulisan hanya lewat service role.
 - Profil otomatis dibuat saat pengguna baru mendaftar (trigger
-  `on_auth_user_created` -> `handle_new_user`).
+  `on_auth_user_created` -> `handle_new_user`), sekaligus menjalankan
+  `provision_starter_data()` untuk mengisi data awal akun baru.
 - `updated_at` diperbarui otomatis lewat trigger.
 - Status security advisor: bersih, kecuali `rls_auto_enable()` (fungsi bawaan
   platform Supabase, owner `postgres`) — diabaikan dengan sadar.
@@ -58,8 +60,10 @@ SUPABASE_SERVICE_ROLE_KEY=<rahasia; hanya untuk webhook/aktivasi di server>
 
 ## Catatan integrasi
 
-Aplikasi memakai `lib/db.ts` (klien `@supabase/supabase-js`) yang masuk sebagai
-**akun demo** memakai kunci publishable/anon, sehingga RLS tetap aktif dan hanya
-data milik akun demo yang terbaca. Jalankan `npm run db:check` untuk menguji
-login + menghitung baris tiap tabel. Akun demo dibuat oleh migrasi seed
-(`20261009000300_seed_demo_data.sql`).
+Aplikasi memakai `lib/db.ts` bersama `lib/supabase/` (`@supabase/ssr`) untuk
+membaca data berdasarkan **sesi pengguna yang sedang masuk** dengan kunci
+publishable/anon, sehingga RLS tetap aktif dan tiap pengguna hanya melihat
+datanya sendiri. Halaman `/login` & `/register` memakai Supabase Auth;
+`middleware.ts` menjaga rute. Jalankan `npm run db:check` untuk menguji login +
+menghitung baris, dan `npm run auth:test` untuk menguji alur login/keluar.
+Akun demo dibuat oleh migrasi seed (`20261009000300_seed_demo_data.sql`).
