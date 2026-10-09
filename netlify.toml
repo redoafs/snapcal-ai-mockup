@@ -1,12 +1,11 @@
 # ===== SnapCal AI - konfigurasi Netlify =====
-# Deploy lewat "Import from GitHub": Netlify mendeteksi Next.js, plugin
-# berikut menangani runtime & publish directory (jangan set publish sendiri).
+# Netlify mendeteksi Next.js otomatis dan memakai "Next.js runtime" bawaan,
+# jadi TIDAK perlu plugin @netlify/plugin-nextjs lagi (versi lama bisa membuat
+# routing rusak di Next.js 15 -> 404). Jangan set publish directory secara
+# manual; biarkan runtime yang mengaturnya.
 
 [build]
   command = "npm run build"
-
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
 
 [build.environment]
   NODE_VERSION = "20"
