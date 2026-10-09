@@ -1,9 +1,3 @@
-/**
- * Tipe database Supabase untuk SnapCal AI.
- * Dihasilkan otomatis dari skema proyek (project_ref: tahnkykyvfshcglwbzui).
- * Regenerasi lewat MCP Supabase (`generate_typescript_types`) atau:
- *   supabase gen types typescript --project-id tahnkykyvfshcglwbzui > lib/database.types.ts
- */
 export type Json =
   | string
   | number
@@ -323,6 +317,54 @@ export type Database = {
         }
         Relationships: []
       }
+      purchases: {
+        Row: {
+          amount_idr: number
+          created_at: string
+          email: string
+          id: number
+          name: string | null
+          phone: string | null
+          product: string | null
+          provider: string
+          provider_ref: string | null
+          purchased_at: string
+          status: string
+          tokens_granted: number
+          user_id: string | null
+        }
+        Insert: {
+          amount_idr?: number
+          created_at?: string
+          email: string
+          id?: never
+          name?: string | null
+          phone?: string | null
+          product?: string | null
+          provider?: string
+          provider_ref?: string | null
+          purchased_at?: string
+          status?: string
+          tokens_granted?: number
+          user_id?: string | null
+        }
+        Update: {
+          amount_idr?: number
+          created_at?: string
+          email?: string
+          id?: never
+          name?: string | null
+          phone?: string | null
+          product?: string | null
+          provider?: string
+          provider_ref?: string | null
+          purchased_at?: string
+          status?: string
+          tokens_granted?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           created_at: string
@@ -359,6 +401,42 @@ export type Database = {
           status?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      token_ledger: {
+        Row: {
+          created_at: string
+          delta: number
+          email: string
+          id: number
+          note: string | null
+          provider: string
+          provider_ref: string | null
+          reason: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          delta: number
+          email: string
+          id?: never
+          note?: string | null
+          provider?: string
+          provider_ref?: string | null
+          reason?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          delta?: number
+          email?: string
+          id?: never
+          note?: string | null
+          provider?: string
+          provider_ref?: string | null
+          reason?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -418,7 +496,14 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      token_balances: {
+        Row: {
+          balance: number | null
+          email: string | null
+          last_at: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
@@ -440,12 +525,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -528,9 +613,7 @@ export type Enums<
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
+  : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
@@ -545,9 +628,7 @@ export type CompositeTypes<
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+  : never
 
 export const Constants = {
   public: {

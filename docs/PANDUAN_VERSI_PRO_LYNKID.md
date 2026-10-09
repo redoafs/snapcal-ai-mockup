@@ -40,8 +40,9 @@ Langkah:
 3. Jalankan aplikasi dan buka layar **Pilih paket** untuk memastikan tombol
    "Langganan via Lynk.id" mengarah ke tautan yang benar.
 
-Paket dan harga didefinisikan di `lib/db.ts` (konstanta `PLAN_TIERS`) dan
-disinkronkan otomatis ke basis data saat aplikasi dibuka — tanpa perlu seed ulang.
+Paket dan harga didefinisikan pada tabel `plan_tiers` di **Supabase**
+(di-seed lewat `supabase/migrations/20261009000300_seed_demo_data.sql`). Ubah
+tabel tersebut lalu perbarui tautan paket di `.env.local` bila perlu.
 
 ## 3. Alur aktivasi pembeli
 
@@ -55,11 +56,15 @@ Target layanan: aktivasi maksimal 1x24 jam. Proses manual memadai untuk fase awa
 
 ## 4. Catatan deploy (Netlify + Supabase)
 
-Aplikasi mockup ini memakai **SQLite** (`better-sqlite3`) yang **tidak berjalan**
-di fungsi serverless Netlify. Sebelum produksi:
+Aplikasi mockup ini sudah memakai **Supabase (Postgres)** melalui
+`@supabase/supabase-js`, sehingga dapat berjalan di fungsi serverless Netlify
+(tidak ada lagi basis data SQLite lokal). Sebelum produksi:
 
-- Pindahkan lapisan data dari SQLite ke **Supabase (Postgres)**.
-- Simpan `service role key` hanya di environment variable server (jangan di klien).
+- Isi variabel Supabase di Netlify:
+  `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
+  `SUPABASE_DEMO_EMAIL`, `SUPABASE_DEMO_PASSWORD` (lihat `.env.example`).
+- Simpan `service role key` (untuk webhook/aktivasi) hanya di environment
+  variable server; **jangan** pernah dipakai di klien.
 - Deploy lewat Netlify (paket Free: 100 GB bandwidth/bulan, 300 menit build).
 - Perhatikan batas Supabase Free: 500 MB DB, dan proyek **pause** bila 7 hari
   tidak aktif (siapkan keep-alive).

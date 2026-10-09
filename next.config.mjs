@@ -6,7 +6,6 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  serverExternalPackages: ['better-sqlite3'],
   webpack: (config) => {
     config.resolve.alias = {
       ...(config.resolve.alias || {}),

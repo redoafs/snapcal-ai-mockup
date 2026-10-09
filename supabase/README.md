@@ -1,7 +1,7 @@
 # Skema Supabase — SnapCal AI
 
-Skema produksi (Postgres) untuk menggantikan lapisan SQLite saat aplikasi
-dipasang di Netlify + Supabase.
+Skema produksi (Postgres) untuk aplikasi SnapCal AI. Aplikasi mockup mengakses
+data ini lewat `@supabase/supabase-js` (tidak ada lagi basis data SQLite lokal).
 
 - Proyek: `tahnkykyvfshcglwbzui`
 - URL: `https://tahnkykyvfshcglwbzui.supabase.co`
@@ -10,8 +10,10 @@ dipasang di Netlify + Supabase.
 
 | Berkas | Isi |
 | --- | --- |
-| `migrations/20261009000000_init_snapcal_schema.sql` | 11 tabel, index FK, trigger, RLS, grant |
+| `migrations/20261009000000_init_snapcal_schema.sql` | 11 tabel inti, index FK, trigger, RLS, grant |
 | `migrations/20261009000100_harden_trigger_functions.sql` | perbaikan keamanan fungsi trigger |
+| `migrations/20261009000200_add_tokens_and_purchases.sql` | `purchases`, `token_ledger`, view `token_balances`, trigger token |
+| `migrations/20261009000300_seed_demo_data.sql` | akun demo + seed data (katalog & pengguna contoh) |
 
 Sudah diterapkan ke proyek.
 
@@ -44,16 +46,20 @@ atau MCP Supabase (`apply_migration`) dengan isi berkas migrasi.
 - Status security advisor: bersih, kecuali `rls_auto_enable()` (fungsi bawaan
   platform Supabase, owner `postgres`) — diabaikan dengan sadar.
 
-## Environment variable aplikasi (langkah berikutnya)
+## Environment variable aplikasi
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=https://tahnkykyvfshcglwbzui.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<publishable/anon key>
-SUPABASE_SERVICE_ROLE_KEY=<rahasia; hanya di server>
+SUPABASE_DEMO_EMAIL=redo@snapcal.ai
+SUPABASE_DEMO_PASSWORD=snapcal-demo-2026
+SUPABASE_SERVICE_ROLE_KEY=<rahasia; hanya untuk webhook/aktivasi di server>
 ```
 
 ## Catatan integrasi
 
-Aplikasi mockup saat ini masih memakai `better-sqlite3` (lokal). Langkah
-berikutnya: ganti `lib/db.ts` agar memakai `@supabase/supabase-js`, tambahkan
-Supabase Auth, lalu pindahkan data seed katalog ke tabel Supabase.
+Aplikasi memakai `lib/db.ts` (klien `@supabase/supabase-js`) yang masuk sebagai
+**akun demo** memakai kunci publishable/anon, sehingga RLS tetap aktif dan hanya
+data milik akun demo yang terbaca. Jalankan `npm run db:check` untuk menguji
+login + menghitung baris tiap tabel. Akun demo dibuat oleh migrasi seed
+(`20261009000300_seed_demo_data.sql`).

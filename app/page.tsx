@@ -1,14 +1,4 @@
-import {
-  getUser,
-  getTodayMeals,
-  getRecommendations,
-  getActivities,
-  getBodyMetrics,
-  getPlans,
-  getScreens,
-  getConsent,
-  getSubscription,
-} from '@/lib/db';
+import { loadData } from '@/lib/db';
 import { Phone } from '@/components/ui';
 import { FirstResultScreen } from '@/components/screens/onboarding';
 import { ScanScreen, ScanProcessingScreen, ScanReviewScreen, ScanFallbackScreen } from '@/components/screens/scan';
@@ -28,26 +18,19 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-type Data = ReturnType<typeof loadData>;
-
-function loadData() {
-  return {
-    user: getUser(),
-    meals: getTodayMeals(),
-    recs: getRecommendations(),
-    acts: getActivities(),
-    metrics: getBodyMetrics(),
-    plans: getPlans(),
-    screens: getScreens(),
-    consent: getConsent(),
-    subscription: getSubscription(),
-  };
-}
-
-export default function Home() {
-  const d = loadData() as Data;
-  const { user, meals, recs, acts, metrics, plans, screens, consent, subscription } =
-    d;
+export default async function Home() {
+  const {
+    user,
+    meals,
+    recs,
+    acts,
+    metrics,
+    plans,
+    screens,
+    consent,
+    subscription,
+    wallet,
+  } = await loadData();
 
   const kcalToday = Math.round(meals.reduce((a, m) => a + m.totals.kcal, 0));
   const gramsToday = Math.round(
@@ -130,7 +113,7 @@ export default function Home() {
     id: 'daily',
     code: 'UF-03 / UF-04',
     title: 'Dashboard, porsi, dan logging',
-    desc: 'Layar utama harian. Angka calories, makro, sugar load, dan rekomendasi porsi dibaca langsung dari SQLite.',
+    desc: 'Layar utama harian. Angka calories, makro, sugar load, dan rekomendasi porsi dibaca langsung dari Supabase.',
     screens: [
       {
         t: 'Dashboard harian',
@@ -201,7 +184,7 @@ export default function Home() {
         t: 'Pengaturan',
         s: 'settings',
         r: 'FR-007, FR-036',
-        el: <SettingsScreen user={user} />,
+        el: <SettingsScreen user={user} wallet={wallet} />,
       },
     ],
   };
@@ -220,7 +203,7 @@ export default function Home() {
               </h1>
               <p className="mt-2 max-w-2xl text-[0.95rem] leading-relaxed text-white/75">
                 Rancangan antarmuka untuk alur inti sesuai PRD SnapCal AI,
-                dibangun dengan Next.js dan data contoh dari SQLite.
+                dibangun dengan Next.js dan data contoh dari Supabase.
               </p>
             </div>
             <dl className="grid grid-cols-2 gap-x-10 gap-y-3 text-[0.8rem] sm:grid-cols-4">
@@ -228,7 +211,7 @@ export default function Home() {
                 ['Layar', String(screens.length)],
                 ['Alur', '8'],
                 ['Modul FR', '11'],
-                ['Tabel DB', '12'],
+                ['Tabel DB', '13'],
               ].map(([k, v]) => (
                 <div key={k}>
                   <dt className="text-[0.68rem] uppercase tracking-[0.08em] text-brand-300">
@@ -254,7 +237,7 @@ export default function Home() {
             Kode FR merujuk PRD SnapCal AI
           </span>
           <span className="ml-auto hidden lg:inline">
-            Data dari <code className="font-mono">data/snapcal.db</code>
+            Data dari <code className="font-mono">Supabase</code>
           </span>
         </div>
       </div>
@@ -319,12 +302,12 @@ export default function Home() {
 
         <section>
           <h2 className="text-2xl font-semibold tracking-[-0.02em] text-ink-950">
-            Data dari SQLite
+            Data dari Supabase
           </h2>
           <p className="mt-1 text-[0.9rem] text-ink-600">
             Angka pada layar mockup dibaca langsung dari{' '}
-            <code className="mx-1 font-mono text-brand-700">data/snapcal.db</code>{' '}
-            melalui better-sqlite3.
+            <code className="mx-1 font-mono text-brand-700">Supabase</code>{' '}
+            melalui @supabase/supabase-js, dengan Row Level Security aktif.
           </p>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[

@@ -376,6 +376,12 @@ export function SubscribeScreen({ plans }: { plans: any[] }) {
           );
         })}
 
+        <Note tone="brand" title="+50 token scan otomatis">
+          Setiap pembayaran yang terverifikasi otomatis menambah 50 token scan
+          ke email Anda (1 token = 1 scan AI), tanpa perlu klaim manual. Saldo
+          dan riwayatnya bisa dilihat di Pengaturan.
+        </Note>
+
         <Note tone="info" title="Pembayaran aman lewat Lynk.id">
           Bayar dengan QRIS, transfer bank (virtual account), atau e-wallet.
           Akses Pro diaktifkan maksimal 1x24 jam setelah pembayaran
@@ -505,7 +511,7 @@ export function PrivacyScreen({ consent, subscription }: { consent: any; subscri
   );
 }
 
-export function SettingsScreen({ user }: { user: any }) {
+export function SettingsScreen({ user, wallet }: { user: any; wallet: any }) {
   const rows = [
     ['Profil tubuh', `Berat ${user?.weight_kg} kg, tinggi ${user?.height_cm} cm`],
     ['Target dan tujuan', user?.goal ?? '-'],
@@ -514,6 +520,7 @@ export function SettingsScreen({ user }: { user: any }) {
     ['Bahasa dan wilayah', 'Bahasa Indonesia, Rupiah (Rp)'],
     ['Deteksi otomatis', 'On-device aktif'],
   ];
+  const entries = (wallet?.entries ?? []).slice(0, 3);
   return (
     <div className="flex h-full flex-col">
       <StatusBar />
@@ -528,6 +535,53 @@ export function SettingsScreen({ user }: { user: any }) {
             <div className="truncate text-[0.72rem] text-ink-500">{user?.email}</div>
           </div>
           <span className="text-ink-300">›</span>
+        </div>
+
+        {/* Dompet token scan */}
+        <div className="card border-brand-200 bg-brand-50">
+          <div className="flex items-center justify-between">
+            <span className="label text-brand-800">Token scan</span>
+            <Chip tone="brand">{wallet?.balance ?? 0} tersisa</Chip>
+          </div>
+          <div className="tabular mt-1 text-[1.8rem] font-semibold leading-none text-brand-900">
+            {wallet?.balance ?? 0}
+          </div>
+          <p className="mt-1 text-[0.7rem] leading-snug text-brand-800">
+            1 token = 1 scan AI. Setiap pembelian Pro menambah{' '}
+            {wallet?.perPurchase ?? 50} token otomatis.
+          </p>
+          {entries.length ? (
+            <ul className="mt-2.5 space-y-1 border-t border-brand-200 pt-2.5">
+              {entries.map((e: any) => (
+                <li key={e.id} className="flex items-center justify-between gap-3">
+                  <span className="truncate text-[0.7rem] text-ink-700">
+                    {e.note ?? e.reason}
+                  </span>
+                  <span
+                    className={`tabular shrink-0 text-[0.72rem] font-semibold ${
+                      e.delta > 0 ? 'text-emerald-600' : 'text-ink-500'
+                    }`}
+                  >
+                    {e.delta > 0 ? `+${e.delta}` : e.delta}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {wallet?.checkoutUrl ? (
+            <a
+              href={wallet.checkoutUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-secondary mt-3 w-full"
+            >
+              Beli token via Lynk.id
+            </a>
+          ) : (
+            <button className="btn-secondary mt-3 w-full" disabled>
+              Tautan pembelian belum diatur
+            </button>
+          )}
         </div>
 
         <div className="card p-0">

@@ -7,16 +7,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "db:seed": "node scripts/seed.mjs"
+    "db:check": "node scripts/check-supabase.mjs"
   },
   "dependencies": {
-    "better-sqlite3": "^13.0.3",
+    "@supabase/supabase-js": "^2.117.3",
     "next": "^15.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^24.0.0",
     "@types/react": "^19.0.0",
     "autoprefixer": "^10.4.21",

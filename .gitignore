@@ -5,7 +5,7 @@ node_modules/
 .next/
 out/
 
-# Local SQLite database (recreate with: npm run db:seed)
+# Basis data lokal lama (tidak dipakai lagi; data kini di Supabase)
 data/*.db
 data/*.db-wal
 data/*.db-shm
