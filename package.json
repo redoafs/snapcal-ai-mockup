@@ -7,8 +7,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "db:check": "node scripts/check-supabase.mjs",
-    "auth:test": "node scripts/check-auth.mjs"
+    "db:check": "node --env-file-if-exists=.env.local scripts/check-supabase.mjs",
+    "auth:test": "node --env-file-if-exists=.env.local scripts/check-auth.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

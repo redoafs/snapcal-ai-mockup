@@ -18,15 +18,33 @@ Yang terjadi saat dibuka:
 
 ## Masuk ke aplikasi
 
-Saat pertama dibuka, aplikasi menampilkan halaman **Masuk** (`/login`).
-Gunakan akun demo:
+Saat pertama dibuka, aplikasi menampilkan **halaman pembuka** (`/welcome`)
+dengan tombol **Mulai sekarang** (daftar) dan **Masuk**. Masuk memakai akun
+demo:
 
 - Email: `redo@snapcal.ai`
 - Kata sandi: `snapcal-demo-2026`
 
 Tombol **Gunakan akun demo** mengisi kolom secara otomatis. Untuk mencoba
-pendaftaran, buka tautan **Daftar** (`/register`); akun baru otomatis mendapat
-data contoh. Tombol **Keluar** ada di kanan atas halaman utama.
+pendaftaran, buka tautan **Daftar** (`/register`); akun baru otomatis
+mendapatkan data contoh **dan** menjalani alur onboarding (profil → data tubuh
+→ tujuan → izin data → hasil pertama) sebelum masuk ke layar **Hari ini**.
+
+## Menelusuri alur aplikasi
+
+Setelah masuk, layar saling tersambung seperti aplikasi biasa:
+
+- **Navigasi bawah**: Hari ini · Pindai · Porsi · Tren · Lainnya.
+- **Pindai**: tekan tombol rana → layar proses → **review hasil** → **Simpan
+  ke log hari ini** kembali ke Beranda.
+- **Lainnya**: Pengaturan · Laporan · Coaching · Paket & token · Privasi, juga
+  tautan **Galeri** (`/layar`) dan tombol **Keluar**.
+- **← Kembali** di bilah atas ponsel untuk mundur satu layar.
+- **Ulangi onboarding (demo)**: di Lainnya → Pengaturan, untuk mencoba lagi
+  alur onboarding kapan saja.
+
+Galeri di `/layar` menampilkan semua layar statis per alur untuk keperluan
+dokumentasi/tangkapan layar.
 
 ## Menghentikan server
 

@@ -1,3 +1,6 @@
+'use client';
+
+import Link from 'next/link';
 import {
   ScreenHead,
   ScreenBody,
@@ -9,8 +12,10 @@ import {
   BottomNav,
   Avatar,
 } from '@/components/ui';
+import { useApp } from '@/components/app/nav';
 
 export function LogScreen() {
+  const app = useApp();
   const quick = [
     ['🍚', 'Nasi', '150 g'],
     ['🍗', 'Ayam', '120 g'],
@@ -82,13 +87,20 @@ export function LogScreen() {
         </div>
       </ScreenBody>
       <BottomAction>
-        <button className="btn-primary w-full">Simpan catatan</button>
+        <button
+          type="button"
+          onClick={() => app?.reset('home')}
+          className="btn-primary w-full"
+        >
+          Simpan catatan
+        </button>
       </BottomAction>
     </div>
   );
 }
 
 export function CoachingScreen() {
+  const app = useApp();
   return (
     <div className="flex h-full flex-col">
       <StatusBar />
@@ -164,7 +176,13 @@ export function CoachingScreen() {
               />
             </div>
           </div>
-          <button className="btn-primary mt-3 w-full">Kirim check-in</button>
+          <button
+            type="button"
+            onClick={() => app?.reset('home')}
+            className="btn-primary mt-3 w-full"
+          >
+            Kirim check-in
+          </button>
         </div>
 
         {/* Adaptive recommendation */}
@@ -199,7 +217,7 @@ export function CoachingScreen() {
           menggantikan konsultasi tenaga profesional.
         </Note>
       </ScreenBody>
-      <BottomNav active="home" />
+      <BottomNav active="more" />
     </div>
   );
 }
@@ -276,6 +294,7 @@ export function ReportScreen() {
         <button className="btn-primary w-full">Unduh laporan PDF</button>
         <button className="btn-secondary w-full">Bagikan ke praktisi</button>
       </ScreenBody>
+      <BottomNav active="more" />
     </div>
   );
 }
@@ -512,6 +531,7 @@ export function PrivacyScreen({ consent, subscription }: { consent: any; subscri
 }
 
 export function SettingsScreen({ user, wallet }: { user: any; wallet: any }) {
+  const app = useApp();
   const rows = [
     ['Profil tubuh', `Berat ${user?.weight_kg} kg, tinggi ${user?.height_cm} cm`],
     ['Target dan tujuan', user?.goal ?? '-'],
@@ -615,10 +635,99 @@ export function SettingsScreen({ user, wallet }: { user: any; wallet: any }) {
           </div>
         </div>
 
+        <button
+          type="button"
+          onClick={() => app?.restartOnboarding()}
+          disabled={app?.saving}
+          className="btn-secondary w-full"
+        >
+          {app?.saving ? 'Memproses…' : 'Ulangi onboarding (demo)'}
+        </button>
+
         <Note tone="warn" title="Mockup UI/UX">
           Layar ini adalah rancangan antarmuka untuk validasi desain.
           Data berasal dari basis data contoh, bukan pengguna nyata.
         </Note>
+      </ScreenBody>
+      <BottomNav active="more" />
+    </div>
+  );
+}
+
+/** Menu "Lainnya": jalan pintas ke fitur sekunder dan aksi akun. */
+export function MoreScreen({
+  user,
+  wallet,
+  saving,
+}: {
+  user: any;
+  wallet: any;
+  saving?: boolean;
+}) {
+  const app = useApp();
+  const items: { title: string; desc: string; screen: any }[] = [
+    { title: 'Pengaturan', desc: 'Profil, token, notifikasi, preferensi', screen: 'settings' },
+    { title: 'Laporan', desc: 'Ringkasan siap dibagikan ke praktisi', screen: 'report' },
+    { title: 'Coaching', desc: 'Check-in harian dan konsistensi', screen: 'coaching' },
+    { title: 'Paket & token', desc: 'Langganan Pro dan saldo token scan', screen: 'subscribe' },
+    { title: 'Privasi dan data', desc: 'Persetujuan, unduh, dan hapus data', screen: 'privacy' },
+  ];
+
+  return (
+    <div className="flex h-full flex-col">
+      <StatusBar />
+      <ScreenHead title="Lainnya" sub="Fitur pendukung dan pengaturan akun." />
+      <ScreenBody className="pb-4">
+        <div className="card flex items-center gap-3">
+          <Avatar name={user?.name ?? 'Redo'} size={46} />
+          <div className="min-w-0 flex-1">
+            <div className="text-[0.9rem] font-semibold text-ink-950">
+              {user?.name}
+            </div>
+            <div className="truncate text-[0.72rem] text-ink-500">{user?.email}</div>
+          </div>
+          <Chip tone="brand">{wallet?.balance ?? 0} token</Chip>
+        </div>
+
+        <div className="card p-0">
+          {items.map((it, i) => (
+            <button
+              type="button"
+              key={it.title}
+              onClick={() => app?.go(it.screen)}
+              className={`flex w-full items-center gap-3 p-3.5 text-left transition hover:bg-ink-50 ${
+                i > 0 ? 'border-t border-ink-100' : ''
+              }`}
+            >
+              <div className="min-w-0 flex-1">
+                <div className="text-[0.82rem] font-semibold text-ink-900">
+                  {it.title}
+                </div>
+                <div className="text-[0.68rem] text-ink-500">{it.desc}</div>
+              </div>
+              <span className="text-ink-300">›</span>
+            </button>
+          ))}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => app?.restartOnboarding()}
+          disabled={saving}
+          className="btn-secondary w-full text-[0.8rem]"
+        >
+          Ulangi onboarding (demo)
+        </button>
+
+        <Link href="/layar" className="btn-secondary w-full text-[0.8rem]">
+          Lihat semua layar (galeri mockup)
+        </Link>
+
+        <form action="/auth/signout" method="post">
+          <button type="submit" className="btn-danger w-full border-red-300">
+            Keluar akun
+          </button>
+        </form>
       </ScreenBody>
       <BottomNav active="more" />
     </div>

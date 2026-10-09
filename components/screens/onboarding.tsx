@@ -1,3 +1,7 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Phone,
   ScreenHead,
@@ -9,6 +13,7 @@ import {
   StatusBar,
   Avatar,
 } from '@/components/ui';
+import { useApp } from '@/components/app/nav';
 
 /** Step dots shared by the onboarding screens. */
 function StepDots({ current, total = 4 }: { current: number; total?: number }) {
@@ -27,10 +32,15 @@ function StepDots({ current, total = 4 }: { current: number; total?: number }) {
 }
 
 export function WelcomeScreen() {
+  const router = useRouter();
   return (
     <div className="flex h-full flex-col bg-gradient-to-b from-brand-700 via-brand-600 to-brand-800">
       <div className="flex justify-end px-5 pt-3">
-        <button className="rounded-lg px-3 py-1.5 text-[0.75rem] font-semibold text-white/90">
+        <button
+          type="button"
+          onClick={() => router.push('/login')}
+          className="rounded-lg px-3 py-1.5 text-[0.75rem] font-semibold text-white/90 hover:bg-white/10"
+        >
           Masuk
         </button>
       </div>
@@ -71,7 +81,11 @@ export function WelcomeScreen() {
       </div>
 
       <div className="px-7 pb-8">
-        <button className="btn w-full bg-white text-brand-800 hover:bg-brand-50">
+        <button
+          type="button"
+          onClick={() => router.push('/register')}
+          className="btn w-full bg-white text-brand-800 hover:bg-brand-50"
+        >
           Mulai sekarang
         </button>
         <p className="mt-3 text-center text-[0.65rem] leading-snug text-white/60">
@@ -166,6 +180,16 @@ export function VerifyScreen() {
 }
 
 export function OnboardingProfileScreen() {
+  const app = useApp();
+  const [name, setName] = useState(app?.onboarding.name ?? 'Redo');
+  const [age, setAge] = useState(String(app?.onboarding.age ?? 31));
+  const [gender, setGender] = useState(app?.onboarding.gender ?? 'male');
+
+  const next = () => {
+    app?.updateOnboarding({ name, age: Number(age) || undefined, gender });
+    app?.go('onboarding-body');
+  };
+
   return (
     <div className="flex h-full flex-col">
       <StatusBar />
@@ -177,12 +201,21 @@ export function OnboardingProfileScreen() {
       <ScreenBody>
         <div>
           <label className="field-label">Nama panggilan</label>
-          <input className="field" defaultValue="Redo" />
+          <input
+            className="field"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
         </div>
         <div>
           <label className="field-label">Usia</label>
           <div className="grid grid-cols-2 gap-2">
-            <input className="field" defaultValue="31" inputMode="numeric" />
+            <input
+              className="field"
+              value={age}
+              onChange={(e) => setAge(e.target.value)}
+              inputMode="numeric"
+            />
             <div className="flex items-center rounded-xl border border-ink-300 px-3 text-[0.9rem] text-ink-600">
               tahun
             </div>
@@ -192,12 +225,17 @@ export function OnboardingProfileScreen() {
           <label className="field-label">Jenis kelamin</label>
           <div className="grid grid-cols-2 gap-2">
             {[
-              ['Pria', true],
-              ['Wanita', false],
-            ].map(([label, on]) => (
-              <div key={label as string} className={`option ${on ? 'option-active' : ''}`}>
-                <span className="text-[0.85rem] font-medium">{label as string}</span>
-              </div>
+              ['male', 'Pria'],
+              ['female', 'Wanita'],
+            ].map(([value, label]) => (
+              <button
+                type="button"
+                key={value}
+                onClick={() => setGender(value)}
+                className={`option ${gender === value ? 'option-active' : ''}`}
+              >
+                <span className="text-[0.85rem] font-medium">{label}</span>
+              </button>
             ))}
           </div>
           <p className="mt-1.5 text-[0.68rem] leading-snug text-ink-400">
@@ -206,18 +244,37 @@ export function OnboardingProfileScreen() {
         </div>
       </ScreenBody>
       <BottomAction>
-        <button className="btn-primary w-full">Lanjut</button>
+        <button type="button" onClick={next} className="btn-primary w-full">
+          Lanjut
+        </button>
       </BottomAction>
     </div>
   );
 }
 
 export function OnboardingBodyScreen() {
-  const activity = [
-    ['Rendah', 'Kantor, jarang olahraga', false],
-    ['Sedang', '1-3 kali seminggu', true],
-    ['Tinggi', '4-6 kali seminggu', false],
+  const app = useApp();
+  const [height, setHeight] = useState(String(app?.onboarding.height_cm ?? 172));
+  const [weight, setWeight] = useState(
+    String(app?.onboarding.weight_kg ?? '74.5').replace('.', ',')
+  );
+  const [level, setLevel] = useState(app?.onboarding.activity_level ?? 'Sedang');
+
+  const activity: [string, string][] = [
+    ['Rendah', 'Kantor, jarang olahraga'],
+    ['Sedang', '1-3 kali seminggu'],
+    ['Tinggi', '4-6 kali seminggu'],
   ];
+
+  const next = () => {
+    app?.updateOnboarding({
+      height_cm: Number(height.replace(',', '.')) || undefined,
+      weight_kg: Number(weight.replace(',', '.')) || undefined,
+      activity_level: level,
+    });
+    app?.go('onboarding-goal');
+  };
+
   return (
     <div className="flex h-full flex-col">
       <StatusBar />
@@ -231,7 +288,12 @@ export function OnboardingBodyScreen() {
           <div>
             <label className="field-label">Tinggi</label>
             <div className="relative">
-              <input className="field tabular" defaultValue="172" inputMode="decimal" />
+              <input
+                className="field tabular"
+                value={height}
+                onChange={(e) => setHeight(e.target.value)}
+                inputMode="decimal"
+              />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[0.75rem] text-ink-400">
                 cm
               </span>
@@ -240,7 +302,12 @@ export function OnboardingBodyScreen() {
           <div>
             <label className="field-label">Berat</label>
             <div className="relative">
-              <input className="field tabular" defaultValue="74,5" inputMode="decimal" />
+              <input
+                className="field tabular"
+                value={weight}
+                onChange={(e) => setWeight(e.target.value)}
+                inputMode="decimal"
+              />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[0.75rem] text-ink-400">
                 kg
               </span>
@@ -250,23 +317,31 @@ export function OnboardingBodyScreen() {
         <div>
           <label className="field-label">Tingkat aktivitas</label>
           <div className="space-y-2">
-            {activity.map(([label, desc, on]) => (
-              <div key={label as string} className={`option ${on ? 'option-active' : ''}`}>
-                <span
-                  className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 ${
-                    on ? 'border-brand-600 bg-brand-600' : 'border-ink-300'
-                  }`}
+            {activity.map(([label, desc]) => {
+              const on = level === label;
+              return (
+                <button
+                  type="button"
+                  key={label}
+                  onClick={() => setLevel(label)}
+                  className={`option w-full text-left ${on ? 'option-active' : ''}`}
                 >
-                  {on ? <span className="h-1.5 w-1.5 rounded-full bg-white" /> : null}
-                </span>
-                <span>
-                  <span className="block text-[0.83rem] font-medium text-ink-900">
-                    {label as string}
+                  <span
+                    className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 ${
+                      on ? 'border-brand-600 bg-brand-600' : 'border-ink-300'
+                    }`}
+                  >
+                    {on ? <span className="h-1.5 w-1.5 rounded-full bg-white" /> : null}
                   </span>
-                  <span className="block text-[0.7rem] text-ink-500">{desc as string}</span>
-                </span>
-              </div>
-            ))}
+                  <span>
+                    <span className="block text-[0.83rem] font-medium text-ink-900">
+                      {label}
+                    </span>
+                    <span className="block text-[0.7rem] text-ink-500">{desc}</span>
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
         <Note tone="brand" title="Bisa diubah nanti">
@@ -274,19 +349,41 @@ export function OnboardingBodyScreen() {
         </Note>
       </ScreenBody>
       <BottomAction>
-        <button className="btn-primary w-full">Lanjut</button>
+        <button type="button" onClick={next} className="btn-primary w-full">
+          Lanjut
+        </button>
       </BottomAction>
     </div>
   );
 }
 
 export function OnboardingGoalScreen() {
+  const app = useApp();
+  const [goal, setGoal] = useState(
+    app?.onboarding.goal ?? 'Menambah massa otot'
+  );
+  const [dietPref, setDietPref] = useState(app?.onboarding.diet_pref ?? 'Toleran');
+  const [note, setNote] = useState(
+    app?.onboarding.medical_note ?? 'Insulin resistance ringan'
+  );
+
   const goals = [
-    ['Menjaga berat badan', false],
-    ['Menambah massa otot', true],
-    ['Menurunkan berat badan', false],
-    ['Mengontrol gula darah', false],
+    'Menjaga berat badan',
+    'Menambah massa otot',
+    'Menurunkan berat badan',
+    'Mengontrol gula darah',
   ];
+  const prefs = ['Toleran', 'Vegetarian', 'Halal', 'Rendah gula'];
+
+  const next = () => {
+    app?.updateOnboarding({
+      goal,
+      diet_pref: dietPref,
+      medical_note: note,
+    });
+    app?.go('consent');
+  };
+
   return (
     <div className="flex h-full flex-col">
       <StatusBar />
@@ -297,26 +394,34 @@ export function OnboardingGoalScreen() {
       />
       <ScreenBody>
         <div className="space-y-2">
-          {goals.map(([label, on]) => (
-            <div key={label as string} className={`option ${on ? 'option-active' : ''}`}>
-              <span
-                className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 ${
-                  on ? 'border-brand-600 bg-brand-600' : 'border-ink-300'
-                }`}
+          {goals.map((label) => {
+            const on = goal === label;
+            return (
+              <button
+                type="button"
+                key={label}
+                onClick={() => setGoal(label)}
+                className={`option w-full text-left ${on ? 'option-active' : ''}`}
               >
-                {on ? <span className="h-1.5 w-1.5 rounded-full bg-white" /> : null}
-              </span>
-              <span className="text-[0.83rem] font-medium">{label as string}</span>
-            </div>
-          ))}
+                <span
+                  className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 ${
+                    on ? 'border-brand-600 bg-brand-600' : 'border-ink-300'
+                  }`}
+                >
+                  {on ? <span className="h-1.5 w-1.5 rounded-full bg-white" /> : null}
+                </span>
+                <span className="text-[0.83rem] font-medium">{label}</span>
+              </button>
+            );
+          })}
         </div>
         <div>
           <label className="field-label">Preferensi makanan</label>
           <div className="flex flex-wrap gap-1.5">
-            {['Toleran', 'Vegetarian', 'Halal', 'Rendah gula'].map((p, i) => (
-              <Chip key={p} tone={i === 0 ? 'brand' : 'neutral'}>
-                {p}
-              </Chip>
+            {prefs.map((p) => (
+              <button type="button" key={p} onClick={() => setDietPref(p)}>
+                <Chip tone={dietPref === p ? 'brand' : 'neutral'}>{p}</Chip>
+              </button>
             ))}
           </div>
         </div>
@@ -324,7 +429,8 @@ export function OnboardingGoalScreen() {
           <label className="field-label">Catatan kondisi medis</label>
           <textarea
             className="field h-20 resize-none"
-            defaultValue="Insulin resistance ringan"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
           />
           <p className="mt-1.5 text-[0.68rem] leading-snug text-ink-400">
             Opsional. Membantu aplikasi menghindari saran yang tidak sesuai.
@@ -332,13 +438,16 @@ export function OnboardingGoalScreen() {
         </div>
       </ScreenBody>
       <BottomAction>
-        <button className="btn-primary w-full">Lanjut</button>
+        <button type="button" onClick={next} className="btn-primary w-full">
+          Lanjut
+        </button>
       </BottomAction>
     </div>
   );
 }
 
 export function ConsentScreen() {
+  const app = useApp();
   return (
     <div className="flex h-full flex-col">
       <StatusBar />
@@ -384,7 +493,14 @@ export function ConsentScreen() {
         <button className="btn-ghost w-full">Baca Kebijakan Privasi lengkap</button>
       </ScreenBody>
       <BottomAction>
-        <button className="btn-primary w-full">Setujui dan lanjutkan</button>
+        <button
+          type="button"
+          onClick={() => app?.finishOnboarding()}
+          disabled={app?.saving}
+          className="btn-primary w-full"
+        >
+          {app?.saving ? 'Menyimpan…' : 'Setujui dan lanjutkan'}
+        </button>
         <p className="mt-2 text-center text-[0.65rem] text-ink-400">
           Anda dapat mencabut izin ini kapan saja di Privasi dan Data.
         </p>
@@ -394,6 +510,7 @@ export function ConsentScreen() {
 }
 
 export function FirstResultScreen({ user }: { user: any }) {
+  const app = useApp();
   return (
     <div className="flex h-full flex-col bg-gradient-to-b from-brand-50 to-white">
       <StatusBar />
@@ -453,7 +570,13 @@ export function FirstResultScreen({ user }: { user: any }) {
         </Note>
       </div>
       <BottomAction>
-        <button className="btn-primary w-full">Lihat rekomendasi porsi</button>
+        <button
+          type="button"
+          onClick={() => app?.reset('portion')}
+          className="btn-primary w-full"
+        >
+          Lihat rekomendasi porsi
+        </button>
       </BottomAction>
     </div>
   );

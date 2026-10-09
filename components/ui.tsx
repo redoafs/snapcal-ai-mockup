@@ -1,4 +1,7 @@
+'use client';
+
 import type { ReactNode } from 'react';
+import { useApp, type ScreenKey } from '@/components/app/nav';
 
 /** Wraps a mockup screen in a phone frame with a caption. */
 export function Phone({
@@ -201,12 +204,13 @@ export function Note({
 
 /** Bottom navigation used across the main app screens. */
 export function BottomNav({ active }: { active: string }) {
-  const items = [
-    { key: 'home', label: 'Hari ini', icon: '◧' },
-    { key: 'scan', label: 'Pindai', icon: '◎' },
-    { key: 'portion', label: 'Porsi', icon: '◑' },
-    { key: 'trends', label: 'Tren', icon: '◔' },
-    { key: 'more', label: 'Lainnya', icon: '···' },
+  const app = useApp();
+  const items: { key: string; screen: ScreenKey; label: string; icon: string }[] = [
+    { key: 'home', screen: 'home', label: 'Hari ini', icon: '◧' },
+    { key: 'scan', screen: 'scan', label: 'Pindai', icon: '◎' },
+    { key: 'portion', screen: 'portion', label: 'Porsi', icon: '◑' },
+    { key: 'trends', screen: 'trends', label: 'Tren', icon: '◔' },
+    { key: 'more', screen: 'more', label: 'Lainnya', icon: '···' },
   ];
   return (
     <nav className="absolute inset-x-0 bottom-0 z-20 border-t border-ink-200 bg-white/95 backdrop-blur">
@@ -215,15 +219,18 @@ export function BottomNav({ active }: { active: string }) {
           const on = it.key === active;
           return (
             <li key={it.key} className="flex-1">
-              <span
-                className={`flex flex-col items-center gap-0.5 rounded-lg py-1
-                  ${on ? 'text-brand-700' : 'text-ink-400'}`}
+              <button
+                type="button"
+                onClick={() => app?.reset(it.screen)}
+                className={`flex w-full flex-col items-center gap-0.5 rounded-lg py-1 transition ${
+                  on ? 'text-brand-700' : 'text-ink-400 hover:text-ink-600'
+                }`}
               >
                 <span className="text-[1.1rem] leading-none">{it.icon}</span>
                 <span className="text-[0.6rem] font-medium leading-none">
                   {it.label}
                 </span>
-              </span>
+              </button>
             </li>
           );
         })}

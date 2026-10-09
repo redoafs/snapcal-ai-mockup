@@ -36,8 +36,9 @@ npm run dev          # mode pengembangan -> http://localhost:3000
 ```
 
 Akun demo di atas adalah **pengguna Supabase Auth asli** — pakai untuk masuk di
-halaman `/login`. Untuk mencoba halaman `/register`, buat akun baru (data contoh
-otomatis dibuatkan, lihat bagian Autentikasi).
+halaman `/login`. Halaman pembuka `/welcome` adalah titik masuk: dari sana Anda
+bisa masuk atau mendaftar. Untuk mencoba halaman `/register`, buat akun baru
+(data contoh + alur onboarding otomatis disiapkan, lihat bagian Autentikasi).
 
 Versi produksi:
 
@@ -63,24 +64,55 @@ Aplikasi memakai **Supabase Auth** sungguhan dengan sesi berbasis cookie
 
 | Rute | Fungsi |
 | --- | --- |
+| `/welcome` | halaman pembuka publik (tombol **Mulai sekarang** & **Masuk**) |
 | `/login` | masuk dengan email + kata sandi (ada tombol "Gunakan akun demo") |
 | `/register` | buat akun baru (nama, email, kata sandi) |
-| `/auth/signout` | keluar (POST dari tombol **Keluar** di header) |
+| `/` | aplikasi: onboarding (bila belum lengkap) atau layar **Hari ini** |
+| `/layar` | galeri semua layar mockup per alur (dokumentasi) |
+| `/auth/signout` | keluar (POST dari tombol **Keluar**) |
 | `/auth/confirm` | menerima tautan verifikasi email |
 
 - **Proteksi rute**: `middleware.ts` mengalihkan pengunjung yang belum masuk ke
-  `/login`, dan mengalihkan pengguna yang sudah masuk menjauh dari
-  `/login` & `/register`.
+  `/welcome`, dan mengalihkan pengguna yang sudah masuk menjauh dari
+  `/welcome`, `/login`, & `/register`.
 - **Isolasi data**: RLS Supabase memakai `auth.uid()`, jadi tiap pengguna hanya
   membaca datanya sendiri.
 - **Provisioning otomatis**: saat mendaftar, trigger `handle_new_user`
   menjalankan `public.provision_starter_data()` sehingga akun baru langsung
   punya profil, langganan **gratis**, consent, rekomendasi porsi, metrik,
   aktivitas, satu hari log makanan, dan **5 token** bonus selamat datang.
+- **Onboarding**: akun yang belum mengisi tujuan (`goal` kosong) diarahkan ke
+  alur onboarding (profil → data tubuh → tujuan → izin data → hasil pertama)
+  sebelum masuk ke layar **Hari ini**. Hasilnya disimpan ke `user_profiles`
+  lewat server action `app/actions.ts`. Untuk mencoba ulang, buka
+  **Lainnya → Pengaturan → Ulangi onboarding (demo)**.
 - **Konfirmasi email**: bila opsi "Confirm email" aktif di Supabase, pendaftar
   harus membuka tautan verifikasi sebelum bisa masuk. Untuk mempermudah uji
   coba, opsi ini bisa dimatikan di
   *Supabase Dashboard → Authentication → Sign In / Providers → Email*.
+
+## Alur aplikasi (UI/UX menyatu)
+
+Seluruh layar kini tersambung menjadi **satu aplikasi yang bisa dinavigasi**
+(bukan lagi dinding galeri). Setelah masuk, aplikasi berjalan di dalam bingkai
+ponsel dengan navigasi bawah: **Hari ini · Pindai · Porsi · Tren · Lainnya**.
+
+```
+/welcome ──Masuk──► /login ──► (onboarding bila perlu) ──► Hari ini
+   │                                                        │
+   └──Daftar──► /register                                   ├── Pindai → proses → review → simpan
+                                                            ├── Porsi / Tren
+                                                            └── Lainnya → Pengaturan · Laporan ·
+                                                                        Coaching · Paket & token ·
+                                                                        Privasi · Galeri · Keluar
+```
+
+- Tombol di dalam layar (mis. **+ Tambah catatan**, tombol rana kamera,
+  **Setujui dan lanjutkan**) memindahkan layar secara nyata.
+- Bilah kendali di atas ponsel menyediakan tombol **← Kembali** dan pintasan ke
+  **Galeri** (`/layar`).
+- Galeri `/layar` tetap memuat semua layar statis per alur untuk keperluan
+  dokumentasi dan tangkapan layar.
 
 ## Basis data (Supabase)
 
@@ -120,8 +152,10 @@ dijelaskan di `docs/PANDUAN_TOKEN_LYNKID.md` (termasuk Apps Script
 ## Struktur proyek
 
 ```
-app/                 # Halaman utama, /login, /register, rute auth
-components/          # Komponen UI dan layar mockup per alur
+app/                 # / (aplikasi), /welcome, /layar (galeri), /login, /register, rute auth
+  actions.ts         # Server action: simpan onboarding, ulangi onboarding
+components/          # Komponen UI dan layar mockup
+  app/               # AppShell + konteks navigasi (alur menyatu)
   screens/           # onboarding, scan, dashboard, other
 lib/db.ts            # Pengambilan data aplikasi (sesi pengguna)
 lib/supabase/        # Klien Supabase server & browser (@supabase/ssr)
@@ -129,8 +163,8 @@ lib/database.types.ts# Tipe hasil generate dari skema Supabase
 middleware.ts        # Penyegar sesi + proteksi rute
 supabase/migrations/ # Skema, seed data, dan provisioning akun baru
 scripts/check-supabase.mjs # Uji koneksi/login Supabase
-scripts/check-auth.mjs     # Uji alur login/keluar (Playwright)
-scripts/capture.mjs  # Tangkapan layar otomatis (Playwright)
+scripts/check-auth.mjs     # Uji alur masuk/keluar + navigasi (Playwright)
+scripts/shot-flow.mjs      # Tangkapan layar alur aplikasi (Playwright)
 scripts/*.ps1        # Launcher aplikasi Windows
 integrations/        # Apps Script webhook Lynk.id
 assets/              # Ikon aplikasi

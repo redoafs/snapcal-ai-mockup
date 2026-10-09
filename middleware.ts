@@ -35,11 +35,12 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
-  const isAuthPage = pathname === '/login' || pathname === '/register';
+  const isAuthPage =
+    pathname === '/login' || pathname === '/register' || pathname === '/welcome';
 
   if (!user && !isAuthPage && !pathname.startsWith('/auth')) {
     const url = request.nextUrl.clone();
-    url.pathname = '/login';
+    url.pathname = '/welcome';
     return NextResponse.redirect(url);
   }
 

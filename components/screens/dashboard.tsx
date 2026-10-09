@@ -1,3 +1,5 @@
+'use client';
+
 import {
   ScreenHead,
   ScreenBody,
@@ -10,6 +12,7 @@ import {
   Avatar,
   ConfidenceBadge,
 } from '@/components/ui';
+import { useApp } from '@/components/app/nav';
 
 type MealRow = {
   id: number;
@@ -42,6 +45,7 @@ export function HomeScreen({
   meals: MealRow[];
   activities: any[];
 }) {
+  const app = useApp();
   const totals = meals.reduce(
     (a, m) => ({
       kcal: a.kcal + m.totals.kcal,
@@ -61,7 +65,11 @@ export function HomeScreen({
       <ScreenHead
         title="Hari ini"
         sub="Kamis, 1 Oktober 2026"
-        right={<Avatar name={user?.name ?? 'Redo'} size={34} />}
+        right={
+          <button type="button" onClick={() => app?.reset('more')} title="Profil">
+            <Avatar name={user?.name ?? 'Redo'} size={34} />
+          </button>
+        }
       />
       <ScreenBody className="pb-4">
         {/* Calorie ring */}
@@ -122,7 +130,13 @@ export function HomeScreen({
         {/* Meals */}
         <div className="flex items-center justify-between pt-1">
           <span className="label">Sesi makan</span>
-          <span className="text-[0.7rem] text-brand-700">Lihat semua</span>
+          <button
+            type="button"
+            onClick={() => app?.go('trends')}
+            className="text-[0.7rem] font-medium text-brand-700 hover:underline"
+          >
+            Lihat semua
+          </button>
         </div>
         <div className="card p-0">
           {meals.map((m, i) => (
@@ -169,7 +183,30 @@ export function HomeScreen({
           </div>
         </div>
 
-        <button className="btn-primary w-full">+ Tambah catatan</button>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => app?.reset('coaching')}
+            className="btn-secondary w-full text-[0.8rem]"
+          >
+            Coaching harian
+          </button>
+          <button
+            type="button"
+            onClick={() => app?.reset('subscribe')}
+            className="btn-secondary w-full text-[0.8rem]"
+          >
+            Paket Pro
+          </button>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => app?.go('log')}
+          className="btn-primary w-full"
+        >
+          + Tambah catatan
+        </button>
       </ScreenBody>
       <BottomNav active="home" />
     </div>
@@ -177,6 +214,7 @@ export function HomeScreen({
 }
 
 export function PortionScreen({ user, recs }: { user: any; recs: any[] }) {
+  const app = useApp();
   const totalGrams = recs.reduce((a, r) => a + r.target_grams, 0);
   const totalKcal = recs.reduce((a, r) => a + r.calorie_target, 0);
   const done = new Set([1, 2, 3]);
@@ -277,7 +315,13 @@ export function PortionScreen({ user, recs }: { user: any; recs: any[] }) {
           berubah bila profil atau target Anda diperbarui.
         </Note>
 
-        <button className="btn-secondary w-full">Sesuaikan target manual</button>
+        <button
+          type="button"
+          onClick={() => app?.go('settings')}
+          className="btn-secondary w-full"
+        >
+          Sesuaikan target manual
+        </button>
       </ScreenBody>
       <BottomNav active="portion" />
     </div>

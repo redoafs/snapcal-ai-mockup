@@ -1,3 +1,6 @@
+'use client';
+
+import { useEffect } from 'react';
 import {
   ScreenHead,
   ScreenBody,
@@ -9,8 +12,10 @@ import {
   BottomNav,
   ConfidenceBadge,
 } from '@/components/ui';
+import { useApp } from '@/components/app/nav';
 
 export function ScanScreen() {
+  const app = useApp();
   return (
     <div className="flex h-full flex-col">
       <div className="relative h-[300px] shrink-0 overflow-hidden bg-ink-900">
@@ -63,7 +68,11 @@ export function ScanScreen() {
       </div>
 
       <div className="absolute inset-x-0 bottom-[58px] z-10 flex justify-center">
-        <button className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-white/80 bg-white shadow-lift">
+        <button
+          type="button"
+          onClick={() => app?.go('scan-processing')}
+          className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-white/80 bg-white shadow-lift"
+        >
           <span className="h-12 w-12 rounded-full bg-brand-600" />
         </button>
       </div>
@@ -73,6 +82,15 @@ export function ScanScreen() {
 }
 
 export function ScanProcessingScreen() {
+  const app = useApp();
+
+  useEffect(() => {
+    if (!app) return;
+    const t = setTimeout(() => app.go('scan-review'), 1900);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="flex h-full flex-col bg-ink-950 text-white">
       <StatusBar />
@@ -121,6 +139,7 @@ export function ScanProcessingScreen() {
 }
 
 export function ScanReviewScreen() {
+  const app = useApp();
   const detected = [
     { name: 'Nasi putih', emoji: '🍚', grams: 120, conf: 0.91, corrected: true },
     { name: 'Ayam bakar', emoji: '🍗', grams: 130, conf: 0.89, corrected: false },
@@ -172,6 +191,14 @@ export function ScanReviewScreen() {
           + Tambah item lain
         </button>
 
+        <button
+          type="button"
+          onClick={() => app?.go('scan-fallback')}
+          className="btn-ghost w-full text-[0.78rem]"
+        >
+          Hasil kurang yakin? Coba bantuan server
+        </button>
+
         <div className="card-flat">
           <div className="mb-2 flex items-center justify-between">
             <span className="label">Total Energi</span>
@@ -193,13 +220,20 @@ export function ScanReviewScreen() {
         </Note>
       </ScreenBody>
       <BottomAction>
-        <button className="btn-primary w-full">Simpan ke log hari ini</button>
+        <button
+          type="button"
+          onClick={() => app?.reset('home')}
+          className="btn-primary w-full"
+        >
+          Simpan ke log hari ini
+        </button>
       </BottomAction>
     </div>
   );
 }
 
 export function ScanFallbackScreen() {
+  const app = useApp();
   return (
     <div className="flex h-full flex-col">
       <StatusBar />
@@ -249,9 +283,27 @@ export function ScanFallbackScreen() {
         </Note>
 
         <div className="space-y-2">
-          <button className="btn-primary w-full">Izinkan sekali ini</button>
-          <button className="btn-secondary w-full">Input manual saja</button>
-          <button className="btn-ghost w-full">Ambil ulang foto</button>
+          <button
+            type="button"
+            onClick={() => app?.reset('scan-review')}
+            className="btn-primary w-full"
+          >
+            Izinkan sekali ini
+          </button>
+          <button
+            type="button"
+            onClick={() => app?.go('log')}
+            className="btn-secondary w-full"
+          >
+            Input manual saja
+          </button>
+          <button
+            type="button"
+            onClick={() => app?.back()}
+            className="btn-ghost w-full"
+          >
+            Ambil ulang foto
+          </button>
         </div>
       </ScreenBody>
     </div>
