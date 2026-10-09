@@ -48,7 +48,8 @@ Pro (Bulanan/Tahunan/Lifetime) dengan tombol checkout ke Lynk.id.
 Atur tautannya lewat environment variable (lihat `.env.example`):
 
 ```
-NEXT_PUBLIC_LYNK_URL=https://lynk.id/<username>
+NEXT_PUBLIC_LYNK_URL=https://lynk.id/snapcal-ai/vrgg5vo5dxwz/checkout
+# opsional, bila tiap paket punya produk Lynk.id sendiri:
 NEXT_PUBLIC_LYNK_PRO_MONTHLY=...
 NEXT_PUBLIC_LYNK_PRO_YEARLY=...
 NEXT_PUBLIC_LYNK_PRO_LIFETIME=...

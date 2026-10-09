@@ -20,11 +20,18 @@ SnapCal AI menggunakan **Lynk.id** sebagai halaman checkout.
 Tautan dibaca dari environment variable (lihat `.env.example`):
 
 ```
-NEXT_PUBLIC_LYNK_URL=https://lynk.id/<username>
-NEXT_PUBLIC_LYNK_PRO_MONTHLY=https://lynk.id/<username>/pro-bulanan
-NEXT_PUBLIC_LYNK_PRO_YEARLY=https://lynk.id/<username>/pro-tahunan
-NEXT_PUBLIC_LYNK_PRO_LIFETIME=https://lynk.id/<username>/pro-lifetime
+NEXT_PUBLIC_LYNK_URL=https://lynk.id/snapcal-ai/vrgg5vo5dxwz/checkout
+
+# Opsional: isi bila membuat produk Lynk.id terpisah untuk tiap paket.
+# NEXT_PUBLIC_LYNK_PRO_MONTHLY=
+# NEXT_PUBLIC_LYNK_PRO_YEARLY=
+# NEXT_PUBLIC_LYNK_PRO_LIFETIME=
 ```
+
+> Catatan: satu tautan Lynk.id hanya menunjuk ke satu produk dengan satu harga.
+> Bila hanya ada satu produk (mis. "SnapCal AI" Rp49.000), ketiga tombol paket
+> akan mengarah ke checkout yang sama. Agar harga yang dibayar sesuai paket yang
+> dipilih, buat produk terpisah dan isi variabel per paket di atas.
 
 Langkah:
 
