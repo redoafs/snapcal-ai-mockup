@@ -1,0 +1,148 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-ink-100 text-ink-900 antialiased;
+    font-family: var(--font-sans);
+  }
+
+  /* Keep focus rings visible for keyboard users, per NFR accessibility. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand-500 ring-offset-2 ring-offset-white;
+  }
+}
+
+@layer components {
+  /* Phone frame used to present every mockup screen side by side. */
+  .phone {
+    @apply relative w-[320px] shrink-0 rounded-[2.25rem] border-[10px] border-ink-950
+           bg-white shadow-lift;
+    height: 664px;
+    overflow: hidden;
+  }
+
+  .phone-notch {
+    @apply absolute left-1/2 top-0 z-30 h-[26px] w-[112px] -translate-x-1/2
+           rounded-b-2xl bg-ink-950;
+  }
+
+  .phone-scroll {
+    @apply h-full overflow-y-auto overscroll-contain pb-20;
+    scrollbar-width: none;
+  }
+
+  .phone-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .screen-head {
+    @apply flex items-start justify-between gap-3 px-5 pb-3 pt-11;
+  }
+
+  .screen-title {
+    @apply text-[1.4rem] font-semibold leading-tight tracking-[-0.02em] text-ink-950;
+  }
+
+  .screen-sub {
+    @apply mt-1 text-[0.8rem] leading-snug text-ink-500;
+  }
+
+  .card {
+    @apply rounded-xl2 border border-ink-200/70 bg-white p-4 shadow-card;
+  }
+
+  .card-flat {
+    @apply rounded-xl2 border border-ink-200/70 bg-ink-50 p-4;
+  }
+
+  .label {
+    @apply text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-ink-500;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1
+           text-[0.7rem] font-medium;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3.5
+           text-[0.9rem] font-semibold transition active:scale-[0.98]
+           disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .btn-primary {
+    @apply btn bg-brand-600 text-white shadow-lift hover:bg-brand-700;
+  }
+
+  .btn-secondary {
+    @apply btn border border-ink-300 bg-white text-ink-800 hover:bg-ink-50;
+  }
+
+  .btn-ghost {
+    @apply btn text-brand-700 hover:bg-brand-50;
+  }
+
+  .btn-danger {
+    @apply btn border border-red-200 bg-white text-red-700 hover:bg-red-50;
+  }
+
+  .field {
+    @apply w-full rounded-xl border border-ink-300 bg-white px-4 py-3
+           text-[0.9rem] text-ink-900 placeholder:text-ink-400
+           focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25;
+  }
+
+  .field-label {
+    @apply mb-1.5 block text-[0.78rem] font-semibold text-ink-700;
+  }
+
+  .option {
+    @apply flex cursor-pointer items-center gap-3 rounded-xl border-2 border-ink-200
+           bg-white p-3.5 transition hover:border-brand-300;
+  }
+
+  .option-active {
+    @apply border-brand-500 bg-brand-50/60;
+  }
+
+  .progress-track {
+    @apply h-2 w-full overflow-hidden rounded-full bg-ink-200;
+  }
+
+  .progress-fill {
+    @apply h-full rounded-full bg-brand-500 transition-[width];
+  }
+
+  .divider {
+    @apply h-px w-full bg-ink-200;
+  }
+}
+
+@layer utilities {
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Shimmer placeholder used for loading states in mockups. */
+.shimmer-block {
+  background: linear-gradient(
+    90deg,
+    #eceef2 0%,
+    #f6f7f9 40%,
+    #eceef2 80%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s linear infinite;
+}
