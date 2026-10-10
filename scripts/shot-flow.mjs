@@ -11,7 +11,7 @@ const OUT =
 mkdirSync(OUT, { recursive: true });
 
 const browser = await chromium.launch();
-const page = await browser.newPage({ viewport: { width: 520, height: 900 } });
+const page = await browser.newPage({ viewport: { width: 360, height: 800 } });
 
 const shot = async (name) => {
   await page.waitForTimeout(700);
