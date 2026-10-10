@@ -102,7 +102,7 @@ export function LogScreen() {
 export function CoachingScreen() {
   const app = useApp();
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col pb-20">
       <StatusBar />
       <ScreenHead
         title="Coaching"
@@ -224,7 +224,7 @@ export function CoachingScreen() {
 
 export function ReportScreen() {
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col pb-20">
       <StatusBar />
       <ScreenHead
         title="Laporan"
@@ -308,7 +308,7 @@ function rupiahShort(n: number) {
 
 export function SubscribeScreen({ plans }: { plans: any[] }) {
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col pb-20">
       <StatusBar />
       <ScreenHead
         title="Pilih paket"
@@ -424,7 +424,7 @@ export function SubscribeScreen({ plans }: { plans: any[] }) {
 
 export function PrivacyScreen({ consent, subscription }: { consent: any; subscription: any }) {
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col pb-20">
       <StatusBar />
       <ScreenHead
         title="Privasi dan data"
@@ -542,7 +542,7 @@ export function SettingsScreen({ user, wallet }: { user: any; wallet: any }) {
   ];
   const entries = (wallet?.entries ?? []).slice(0, 3);
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col pb-20">
       <StatusBar />
       <ScreenHead title="Pengaturan" sub="Profil, notifikasi, dan preferensi." />
       <ScreenBody className="pb-4">
@@ -674,7 +674,7 @@ export function MoreScreen({
   ];
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col pb-20">
       <StatusBar />
       <ScreenHead title="Lainnya" sub="Fitur pendukung dan pengaturan akun." />
       <ScreenBody className="pb-4">

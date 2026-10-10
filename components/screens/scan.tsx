@@ -17,7 +17,7 @@ import { useApp } from '@/components/app/nav';
 export function ScanScreen() {
   const app = useApp();
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col pb-20">
       <div className="relative h-[300px] shrink-0 overflow-hidden bg-ink-900">
         <div className="absolute inset-0 flex items-center justify-center">
           <span className="text-[4rem] opacity-70">🍚</span>

@@ -38,7 +38,7 @@
   }
 
   .phone-scroll {
-    @apply h-full overflow-y-auto overscroll-contain pb-20;
+    @apply h-full overflow-y-auto overscroll-contain;
     scrollbar-width: none;
   }
 

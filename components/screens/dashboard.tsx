@@ -60,7 +60,7 @@ export function HomeScreen({
   const activityMin = activities.reduce((a, x) => a + x.duration_min, 0);
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col pb-20">
       <StatusBar />
       <ScreenHead
         title="Hari ini"
@@ -220,7 +220,7 @@ export function PortionScreen({ user, recs }: { user: any; recs: any[] }) {
   const done = new Set([1, 2, 3]);
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col pb-20">
       <StatusBar />
       <ScreenHead
         title="Rekomendasi porsi"
@@ -342,7 +342,7 @@ export function TrendsScreen({ meals, metrics }: { meals: MealRow[]; metrics: an
   const todayIdx = 4;
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col pb-20">
       <StatusBar />
       <ScreenHead
         title="Tren"
